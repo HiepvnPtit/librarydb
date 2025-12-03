@@ -1,5 +1,5 @@
 import TopBar from "../components/TopBar";
-import { MoreHorizontal, Mail, Phone } from "lucide-react";
+import { Plus,Search,MoreHorizontal, Mail, Phone } from "lucide-react";
 
 export default function UserManagement() {
   const users = [
@@ -12,6 +12,20 @@ export default function UserManagement() {
   return (
     <div>
       <TopBar title="User Management" />
+      {/* Filter / Search Bar */}
+            <div className="card filter-bar">
+               <div className="search-wrapper">
+                  <Search size={18} color="#A3AED0" />
+                  <input 
+                    placeholder="Search by user or book..." 
+                    className="search-input-field" 
+                  />
+               </div>
+               
+               <button className="btn-primary">
+                  <Plus size={18} /> Create Slip
+               </button>
+            </div>
 
       {/* Grid Layout */}
       <div className="user-grid">

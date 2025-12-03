@@ -1,7 +1,7 @@
 
 
-import { createUser, loginAuthentication } from '../api/authenticationApi';
-import type { LoginDto } from '../api/authenticationApi';
+import { createUser, loginAuthentication } from '../api/apiService';
+import type { LoginDto } from '../api/apiService';
 import { useState } from "react"
 
 export default function LoginPage() {
@@ -18,9 +18,9 @@ export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [location, setLocation] = useState<string>("");
 
-  // SỬA 2: Thêm tham số (e) và e.preventDefault()
+
   const handleSubmitLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Chặn hành vi reload trang mặc định
+    e.preventDefault(); 
 
     const loginDto: LoginDto = {
       username: username,
@@ -31,7 +31,9 @@ export default function LoginPage() {
       console.log("Login Sending:", loginDto);
       const response = await loginAuthentication(loginDto);
       console.log("Login Success:", response);
-      alert("Đăng nhập thành công!"); // Thông báo nhẹ
+      
+      window.location.href = '/';
+      alert("Đăng nhập thành công!");
     } catch (error: any) {
       console.error("Login Error:", error);
       alert("Đăng nhập thất bại");
@@ -40,12 +42,12 @@ export default function LoginPage() {
   
 
   const handleSubmitRegister = async (e: React.FormEvent) => {
-    e.preventDefault(); // Chặn hành vi reload trang mặc định
+    e.preventDefault();
 
      const registerDto = {
       username: username,
       password: password,
-      // API thường cần Date object hoặc ISO string, ta convert tại đây nếu cần
+
       birthDate: new Date(birthDate), 
       email: email,
       phoneNumber: phoneNumber,
@@ -57,7 +59,7 @@ export default function LoginPage() {
       const response = await createUser(registerDto);
       console.log("Register Success:", response);
       alert("Đăng ký thành công!");
-      setIsActive(false); // Chuyển về tab Login sau khi đăng ký xong
+      setIsActive(false); 
     } catch (error: any) {
       console.error("Register Error:", error);
       alert("Đăng ký thất bại");

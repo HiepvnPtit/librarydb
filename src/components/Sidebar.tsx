@@ -8,34 +8,33 @@ import {
   Library
 } from "lucide-react";
 
-// ĐÃ XÓA: import "./Sidebar.css"; (Vì đã dùng global.css)
 
 export default function Sidebar() {
   const location = useLocation();
 
   const menuItems = [
     { 
-      path: "/", 
+      path: "/admin/dashboard", 
       label: "Dashboard", 
       icon: <LayoutDashboard size={20} /> 
     },
     { 
-      path: "/books", 
+      path: "/admin/books", 
       label: "Book Management", 
       icon: <BookOpen size={20} /> 
     },
     { 
-      path: "/circulation", 
+      path: "/admin/circulation", 
       label: "Circulation", 
       icon: <Repeat size={20} /> 
     },
     { 
-      path: "/users", 
+      path: "/admin/users" , 
       label: "User Management", 
       icon: <Users size={20} /> 
     },
     { 
-      path: "/settings", 
+      path:"/admin/settings", 
       label: "Settings", 
       icon: <Settings size={20} /> 
     },

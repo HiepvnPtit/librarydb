@@ -32,16 +32,16 @@ export default function App() {
         <Route path="/auth" element={<LoginPage />} />
 
         {/* Route Protected: Admin Dashboard */}
-        <Route path="/" element={<AdminLayout />}>
+        <Route path="/admin" element={<AdminLayout />}>
           
           {/* Dashboard (Trang chủ) */}
           <Route index element={<Dashboard />} />
-          
+          <Route path="/admin/dashboard" element={<Dashboard />} />
           {/* Các trang chức năng */}
-          <Route path="books" element={<BookManagement />} />
-          <Route path="circulation" element={<CirculationManagement />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="/admin/books" element={<BookManagement />} />
+          <Route path="/admin/circulation" element={<CirculationManagement />} />
+          <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/settings" element={<Settings />} />
           
         </Route>
       </Routes>

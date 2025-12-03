@@ -237,11 +237,11 @@ body {
       5. COMPONENT: CARDS & STATS
        */
 .card {
-  background: var(--bg-card);
+  background: linear-gradient(to right, #d0e6f9, #d0e6f9); 
   border-radius: var(--radius-xl);
   padding: 24px;
   box-shadow: var(--shadow-card);
-  height: 100%;
+  height: auto;
   background-color: #cdd8ff;
   /* Để lấp đầy grid */
   border: none;
@@ -293,8 +293,11 @@ body {
       6. COMPONENT: TABLES
        */
 .table-container {
-  width: 100%;
+  margin: 1%;
+  width: 98%;
   border-collapse: collapse;
+  border-radius: 5px;
+  
 }
 
 .table-container th {
@@ -302,15 +305,18 @@ body {
   padding: 16px 20px;
   color: var(--text-secondary);
   font-size: 14px;
-  border-bottom: 1px solid #E9EDF7;
+  border-bottom: 3px solid #E9EDF7;
   font-weight: 500;
 }
 
 .table-container td {
+  
+  background-color: #e8efff;
+  /* border-radius: 12px; */
   padding: 16px 20px;
   color: var(--text-main);
   font-weight: 600;
-  border-bottom: 1px solid #E9EDF7;
+  border-bottom: 3px solid white; 
 }
 
 .status-badge {
@@ -834,7 +840,32 @@ body {
 /* 
    13. BOOK MANAGEMENT & GENERAL ACTIONS
     */
+/* =========================================
+   14. BOOK STATUS BADGES
+   ========================================= */
 
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Các biến thể màu sắc */
+.badge-success { background: #E6FAF5; color: #05CD99; } /* Còn hàng */
+.badge-warning { background: #FFF8E6; color: #FFB547; } /* Sắp hết */
+.badge-danger  { background: #FFECEB; color: #EE5D50; } /* Hết hàng */
+.badge-gray    { background: #F4F7FE; color: #A3AED0; } /* Ngừng kinh doanh */
+
+/* Style cho số lượng (Stock) */
+.stock-info {
+  font-weight: 600;
+  color: var(--text-main);
+}
+.stock-low { color: var(--danger-color); }
 /* Header của Section (Tiêu đề + Nút Add) */
 .section-header {
   display: flex;
