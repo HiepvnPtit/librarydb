@@ -5,7 +5,8 @@ import { Loader2, Plus, Edit, Trash2 } from "lucide-react";
 import {
   useBookData, useAuthorData, useCategoryData, useTagData
 } from '../hooks/useManagementHooks';
-import type { Book, Author, Category, Tag } from '../hooks/useManagementHooks';
+import type  { Book, Author, Category, Tag } from '../hooks/useManagementHooks';
+
 
 const getStatusBadge = (book: Book) => {
   if (!book.isActive) return <span className="status-badge badge-gray">Inactive</span>;
