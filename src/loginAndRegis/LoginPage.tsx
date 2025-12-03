@@ -1,10 +1,10 @@
-"use client"
+
 
 import { createUser, loginAuthentication } from '../api/authenticationApi';
 import type { LoginDto } from '../api/authenticationApi';
 import { useState } from "react"
 
-export default function AuthPage() {
+export default function LoginPage() {
   const [isActive, setIsActive] = useState(false)
 
   const handleRegisterClick = () => setIsActive(true)
