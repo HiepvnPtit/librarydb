@@ -1,4 +1,0 @@
-{
-  "categoryName": "string",
-  "description": "string"
-}

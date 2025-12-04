@@ -1,5 +1,0 @@
-{
-  "authorName": "string",
-  "biography": "string"
-}
-
