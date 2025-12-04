@@ -3,11 +3,11 @@ import { useFetchData } from './useFetchData';
 import * as api from '../api/apiService'; 
 
 // Định nghĩa Interface sơ lược (Nên lấy từ file BookApi hoặc Model)
-export interface Book { id: number; title: string; availableQuantity: number; totalQuantity: number; isActive: boolean; category: { categoryName: string; }; authors: { authorName: string; }[]; bookCode?: string; }
+export interface Book { id: number; title: string; availableQuantity: number; totalQuantity: number; isActive: boolean; category: { id: number; categoryName: string; }; authors: { id: number; authorName: string; }[]; bookCode?: string; }
 export interface Author { id: number; authorName: string; biography: string; }
 export interface Category { id: number; categoryName: string; description: string; }
-export interface BorrowSlip { id: number; user: string; book: string; status: string; }
-export interface User { id: number; name: string; email: string; role: string; }
+export interface BorrowSlip { id: number; slipCode: string; reader: { id: number; username: string; }; details: { id: number; book: { id: number; title: string; }; borrowDate: number[]; dueDate: number[]; }[]; status: string; }
+export interface User { id: number; userCode: string; username: string; email: string; phoneNumber: string; roles: string[]; status: string; bookQuota: number; }
 export interface Tag { id: number; tagName: string; description: string; }
 
 

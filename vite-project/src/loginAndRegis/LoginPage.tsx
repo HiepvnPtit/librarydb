@@ -32,7 +32,7 @@ export default function LoginPage() {
       const response = await loginAuthentication(loginDto);
       console.log("Login Success:", response);
       
-      window.location.href = '/';
+      window.location.href = '/admin';
       alert("Đăng nhập thành công!");
     } catch (error: any) {
       console.error("Login Error:", error);

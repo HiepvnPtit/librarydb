@@ -1,27 +1,62 @@
 import TopBar from "../components/TopBar";
-import { Search, CheckCircle, AlertCircle, Clock, Plus } from "lucide-react";
+import { Search, CheckCircle, AlertCircle, Clock, Plus, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useBorrowSlipData, useUserData, useBookData } from '../hooks/useManagementHooks';
+import type { BorrowSlip } from '../hooks/useManagementHooks';
+import { searchItems } from "../service/SearchingItem";
+import CreateBorrowSlipForm from "../components/forms/CreateBorrowSlipForm";
+
 
 export default function CirculationManagement() {
-  // Mock data
-  const borrowSlips = [
-    { id: 1, user: "John Doe", book: "The Great Gatsby", borrowDate: "2024-03-01", dueDate: "2024-03-15", status: "Active" },
-    { id: 2, user: "Jane Smith", book: "Clean Code", borrowDate: "2024-02-10", dueDate: "2024-02-24", status: "Overdue" },
-    { id: 3, user: "Admin User", book: "Design Patterns", borrowDate: "2024-03-05", dueDate: "2024-03-19", status: "Returned" },
-  ];
+  const { data: borrowSlips, loading, refetch: refetchBorrowSlips } = useBorrowSlipData(true);
+  const { data: users } = useUserData(false);
+  const { data: books } = useBookData(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<BorrowSlip[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isCreateBorrowSlipModalOpen, setIsCreateBorrowSlipModalOpen] = useState(false);
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    
+    if (!query.trim()) {
+      setSearchResults(null);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await searchItems(query, "borrow-slips", { borrowSlips });
+      setSearchResults((results as BorrowSlip[]) || []);
+    } catch (err) {
+      console.error('Error searching borrow slips:', err);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Helper to format date array [YYYY, MM, DD] to string
+  const formatDate = (dateArray: number[] | null | undefined) => {
+    if (!dateArray || dateArray.length < 3) return 'N/A';
+    return `${dateArray[0]}-${String(dateArray[1]).padStart(2, '0')}-${String(dateArray[2]).padStart(2, '0')}`;
+  };
 
   // Helper để lấy Config hiển thị (Icon + Class) dựa trên status
   const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "Active": 
+    switch (status?.toUpperCase()) {
+      case "BORROWED": 
         return { className: "badge-active", icon: <Clock size={14} /> };
-      case "Overdue": 
+      case "OVERDUE": 
         return { className: "badge-overdue", icon: <AlertCircle size={14} /> };
-      case "Returned": 
+      case "RETURNED": 
         return { className: "badge-returned", icon: <CheckCircle size={14} /> };
       default: 
         return { className: "", icon: null };
     }
   };
+
+  const displaySlips = searchResults !== null ? searchResults : (borrowSlips as BorrowSlip[]);
 
   return (
     <div>
@@ -29,60 +64,93 @@ export default function CirculationManagement() {
 
       {/* Filter / Search Bar */}
       <div className="card filter-bar">
-         <div className="search-wrapper">
-            <Search size={18} color="#A3AED0" />
-            <input 
-              placeholder="Search by user or book..." 
-              className="search-input-field" 
-            />
-         </div>
-         
-         <button className="btn-primary">
-            <Plus size={18} /> Create Slip
-         </button>
+        <div className="search-wrapper">
+          <Search size={18} color="#A3AED0" />
+          <input 
+            placeholder="Search by user or book..." 
+            className="search-input-field"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+        </div>
+        
+        <button className="btn-primary" onClick={() => setIsCreateBorrowSlipModalOpen(true)}>
+          <Plus size={18} /> Create Slip
+        </button>
       </div>
 
+      {/* Loading State */}
+      {(loading || isSearching) && (
+        <div className="empty-state">
+          <Loader2 className="animate-spin" size={30} />
+          <p>Loading circulation data...</p>
+        </div>
+      )}
+
       {/* Table */}
-      <div className="card" style={{ padding: 0 }}> {/* Padding 0 để table full viền */}
-        <table className="table-container">
-          <thead>
-            <tr>
-              <th>Borrower</th>
-              <th>Book Title</th>
-              <th>Borrowed</th>
-              <th>Due Date</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {borrowSlips.map((item) => {
-              const config = getStatusConfig(item.status);
-              
-              return (
-                <tr key={item.id}>
-                  <td style={{ fontWeight: 700 }}>{item.user}</td>
-                  <td>{item.book}</td>
-                  <td>{item.borrowDate}</td>
-                  <td>{item.dueDate}</td>
-                  <td>
-                    <span className={`status-badge ${config.className}`}>
-                      {config.icon} {item.status}
-                    </span>
-                  </td>
-                  <td>
-                    {item.status !== "Returned" && (
-                        <button className="btn-outline-primary">
-                            Return Book
-                        </button>
-                    )}
-                  </td>
+      {!loading && !isSearching && (
+        <div className="card" style={{ padding: 0 }}>
+          <table className="table-container">
+            <thead>
+              <tr>
+                <th>Slip Code</th>
+                <th>Borrower</th>
+                <th>Book Title</th>
+                <th>Borrow Date</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displaySlips.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="empty-state">No borrow slips found.</td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                displaySlips.map((item: any) => {
+                  const config = getStatusConfig(item.status);
+                  const firstDetail = item.details?.[0];
+                  
+                  return (
+                    <tr key={item.id}>
+                      <td style={{ fontWeight: 700 }}>{item.slipCode}</td>
+                      <td>{item.reader?.username || 'N/A'}</td>
+                      <td>{firstDetail?.book?.title || 'N/A'}</td>
+                      <td>{formatDate(firstDetail?.borrowDate)}</td>
+                      <td>{formatDate(firstDetail?.dueDate)}</td>
+                      <td>
+                        <span className={`status-badge ${config.className}`}>
+                          {config.icon} {item.status}
+                        </span>
+                      </td>
+                      <td>
+                        {item.status !== "RETURNED" && (
+                          <button className="btn-outline-primary">
+                            Return Book
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Create Borrow Slip Form */}
+      <CreateBorrowSlipForm
+        isOpen={isCreateBorrowSlipModalOpen}
+        onClose={() => setIsCreateBorrowSlipModalOpen(false)}
+        onSuccess={() => {
+          refetchBorrowSlips && refetchBorrowSlips();
+          setIsCreateBorrowSlipModalOpen(false);
+        }}
+        users={users || []}
+        books={books || []}
+      />
     </div>
   );
 }

@@ -13,8 +13,13 @@ export const loginAuthentication = async (loginDto: LoginDto) => {
     const response: any = await axiosClient.post('/authentication/token', loginDto);
 
  
-    if (response && response.result && response.token) {
+    if (response && response.token) {
         localStorage.setItem('accessToken', response.token); 
+    } else {
+        window.location.href = '/auth'; 
+        throw new Error('Authentication failed: No token received');
+        
+
     }
     
     return response;
@@ -58,10 +63,24 @@ export const getBooksByAuthorId = (authorId: number | string) => {
     return axiosClient.get(`/api/books/author/${authorId}`);
 };
 
+export const getBooksByUserId = (userId: number | string) => {
+    return axiosClient.get(`/api/books/user/${userId}`);
+}
+
+export const getBooksByPageCount = (pageCount: number | string) => {
+    return axiosClient.get('/api/books/page', {
+        params: { pageCount: pageCount }
+    });
+}
+
 export const searchBooksByTitle = (title: string) => {
     return axiosClient.get('/api/books/searchByTitle', {
         params: { title: title }
     });
+};
+
+export const updateBook = (bookId: number | string, bookDto: any) => {
+    return axiosClient.put(`/api/books/${bookId}`, bookDto);
 };
 
 export const getBooksByCategoryAndTags = (categoryId: number | string, listTagsId: (number | string)[]) => {
@@ -195,6 +214,10 @@ export const getUserById = (userId: number | string) => {
 
 export const createUser = (userDto: any) => {
     return axiosClient.post('/api/users', userDto);
+};
+
+export const getUserName = ( username: string) => {
+    return axiosClient.get(`/api/users/username/${username}`);
 };
 
 export const updateUser = (userId: number | string, userDto: any) => {
