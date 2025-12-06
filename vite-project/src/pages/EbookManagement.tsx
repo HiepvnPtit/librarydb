@@ -1,6 +1,6 @@
 import { useState } from "react";
 import TopBar from "../components/TopBar";
-import { Search, Loader2, Plus, FileImage, ExternalLink, Eye } from "lucide-react";
+import { Search, Loader2, Plus, FileImage, Eye } from "lucide-react";
 import { useBookData } from "../hooks/useManagementHooks";
 import CreateEbookForm from "../components/forms/create/CreateEbookForm";
 import EbookViewerModal from "../components/modals/EbookViewerModal";
