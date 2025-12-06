@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { createBook, createAuthor, createCategory, createTag, getAllAuthors, getAllCategories, getAllTags } from "../../api/apiService";
-import type { Author, Category, Tag } from "../../hooks/useManagementHooks";
+import { createBook, createAuthor, createCategory, createTag, getAllAuthors, getAllCategories, getAllTags } from "../../../api/apiService";
+import type { Author, Category, Tag } from "../../../hooks/useManagementHooks";
 
 interface CreateBookFormProps {
   isOpen: boolean;
@@ -559,37 +559,31 @@ export default function CreateBookForm({
               </button>
             </div>
 
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ gridColumn: "1 / -1", marginTop: 10 }}>
+              <label
+                style={{
+                  display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
+                  padding: "10px", border: "1px solid #e0e0e0", borderRadius: "8px",
+                  backgroundColor: bookForm.isEbook ? "#f0fdf4" : "#fff"
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={bookForm.isEbook}
                   onChange={(e) => handleBookInput("isEbook", e.target.checked)}
+                  style={{ width: 18, height: 18 }}
                 />
-                <span>Chuyển thành eBook</span>
-              </label>
-
-              {bookForm.isEbook && (
-                <div style={{ marginTop: 12, padding: "12px", backgroundColor: "#e8f4f8", borderRadius: 4 }}>
-                  <label className="form-label">URL eBook</label>
-                  <input
-                    className="form-input"
-                    value={bookForm.ebookUrl}
-                    onChange={(e) => handleBookInput("ebookUrl", e.target.value)}
-                    placeholder="https://example.com/ebook.pdf"
-                    style={{ marginBottom: 8 }}
-                  />
-
-                  <label className="form-label">Nội Dung eBook</label>
-                  <textarea
-                    className="form-input form-textarea"
-                    value={bookForm.ebookContent}
-                    onChange={(e) => handleBookInput("ebookContent", e.target.value)}
-                    placeholder="Nhập nội dung eBook..."
-                  />
+                <div>
+                  <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    Đánh dấu là Ebook
+                  </div>
+                  <div style={{ fontSize: 12, color: "#666" }}>
+                    (Sách này sẽ hiển thị bên menu Ebook Management để upload nội dung)
+                  </div>
                 </div>
-              )}
+              </label>
             </div>
+
           </div>
 
           <div style={{ marginTop: 20, display: "flex", gap: 8, justifyContent: "flex-end" }}>

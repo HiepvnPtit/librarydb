@@ -1,42 +1,48 @@
 import { Link, useLocation } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Repeat, 
-  Users, 
-  Settings, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  Repeat,
+  Users,
+  Settings,
   Library
 } from "lucide-react";
 
+import { Tablet } from "lucide-react";
 
 export default function Sidebar() {
   const location = useLocation();
 
   const menuItems = [
-    { 
-      path: "/admin/dashboard", 
-      label: "Dashboard", 
-      icon: <LayoutDashboard size={20} /> 
+    {
+      path: "/admin/dashboard",
+      label: "Dashboard",
+      icon: <LayoutDashboard size={20} />
     },
-    { 
-      path: "/admin/books", 
-      label: "Book Management", 
-      icon: <BookOpen size={20} /> 
+    {
+      path: "/admin/books",
+      label: "Book Management",
+      icon: <BookOpen size={20} />
     },
-    { 
-      path: "/admin/circulation", 
-      label: "Circulation", 
-      icon: <Repeat size={20} /> 
+    {
+      path: "/admin/ebooks",
+      label: "Ebook Management",
+      icon: <Tablet size={20} />
     },
-    { 
-      path: "/admin/users" , 
-      label: "User Management", 
-      icon: <Users size={20} /> 
+    {
+      path: "/admin/circulation",
+      label: "Circulation",
+      icon: <Repeat size={20} />
     },
-    { 
-      path:"/admin/settings", 
-      label: "Settings", 
-      icon: <Settings size={20} /> 
+    {
+      path: "/admin/users",
+      label: "User Management",
+      icon: <Users size={20} />
+    },
+    {
+      path: "/admin/settings",
+      label: "Settings",
+      icon: <Settings size={20} />
     },
   ];
 
@@ -54,12 +60,12 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         {menuItems.map((item) => {
           // Logic kiểm tra active: Chính xác
-          const isActive = location.pathname === item.path || 
-                          (item.path !== "/" && location.pathname.startsWith(item.path));
+          const isActive = location.pathname === item.path ||
+            (item.path !== "/" && location.pathname.startsWith(item.path));
           return (
-            <Link 
-              key={item.path} 
-              to={item.path} 
+            <Link
+              key={item.path}
+              to={item.path}
               className={`nav-item ${isActive ? "active" : ""}`}
             >
               <span className="nav-icon">{item.icon}</span>
@@ -70,14 +76,14 @@ export default function Sidebar() {
           );
         })}
       </nav>
-      
+
       <div className="sidebar-footer">
         <div className="admin-card">
-            <div className="admin-avatar">AD</div>
-            <div className="admin-info">
-                <p className="admin-name">Administrator</p>
-                <p className="admin-role">Super Admin</p>
-            </div>
+          <div className="admin-avatar">AD</div>
+          <div className="admin-info">
+            <p className="admin-name">Administrator</p>
+            <p className="admin-role">Super Admin</p>
+          </div>
         </div>
       </div>
     </aside>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { createCategory } from "../../api/apiService";
+import { createCategory } from "../../../api/apiService";
 
 interface CreateCategoryFormProps {
   isOpen: boolean;

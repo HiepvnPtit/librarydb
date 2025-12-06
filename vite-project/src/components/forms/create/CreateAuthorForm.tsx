@@ -1,30 +1,30 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { createTag } from "../../api/apiService";
+import { createAuthor } from "../../../api/apiService";
 
-interface CreateTagFormProps {
+interface CreateAuthorFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function CreateTagForm({ isOpen, onClose, onSuccess }: CreateTagFormProps) {
-  const [form, setForm] = useState({ tagName: "", description: "" });
+export default function CreateAuthorForm({ isOpen, onClose, onSuccess }: CreateAuthorFormProps) {
+  const [form, setForm] = useState({ authorName: "", biography: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.tagName.trim()) return alert("Tên tag bắt buộc");
+    if (!form.authorName.trim()) return alert("Tên tác giả bắt buộc");
     
     setIsSubmitting(true);
     try {
-      await createTag(form);
+      await createAuthor(form);
       onSuccess();
-      setForm({ tagName: "", description: "" });
+      setForm({ authorName: "", biography: "" });
       onClose();
     } catch (err) {
-      console.error("Create tag failed", err);
-      alert("Tạo tag thất bại");
+      console.error("Create author failed", err);
+      alert("Tạo tác giả thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -36,7 +36,7 @@ export default function CreateTagForm({ isOpen, onClose, onSuccess }: CreateTagF
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h3>Tạo Tag Mới</h3>
+          <h3>Tạo Tác Giả Mới</h3>
           <button className="btn-cancel" onClick={onClose}>
             <X size={20} />
           </button>
@@ -44,28 +44,28 @@ export default function CreateTagForm({ isOpen, onClose, onSuccess }: CreateTagF
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Tên Tag *</label>
+            <label className="form-label">Tên Tác Giả *</label>
             <input
               className="form-input"
-              value={form.tagName}
-              onChange={(e) => setForm({ ...form, tagName: e.target.value })}
+              value={form.authorName}
+              onChange={(e) => setForm({ ...form, authorName: e.target.value })}
               required
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Mô Tả</label>
+            <label className="form-label">Tiểu Sử</label>
             <textarea
               className="form-input form-textarea"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              value={form.biography}
+              onChange={(e) => setForm({ ...form, biography: e.target.value })}
               rows={4}
             />
           </div>
 
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12 }}>
             <button type="submit" className="btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? "Đang tạo..." : "Tạo Tag"}
+              {isSubmitting ? "Đang tạo..." : "Tạo Tác Giả"}
             </button>
             <button type="button" className="btn-cancel" onClick={onClose}>
               Hủy

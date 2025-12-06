@@ -10,6 +10,7 @@ import UserManagement from "./pages/UserManagement";
 import CirculationManagement from "./pages/CirculationManagement";
 import Settings from "./pages/Settings";
 import LoginPage from "./loginAndRegis/LoginPage"; // Hoặc đường dẫn tới file Login của bạn
+import EbookManagement from "./pages/EbookManagement";
 
 // Admin Layout: Chứa Sidebar và vùng nội dung chính
 const AdminLayout = () => {
@@ -42,7 +43,7 @@ export default function App() {
           <Route path="/admin/circulation" element={<CirculationManagement />} />
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/settings" element={<Settings />} />
-          
+          <Route path="/admin/ebooks" element={<EbookManagement />} />
         </Route>
       </Routes>
     </Router>

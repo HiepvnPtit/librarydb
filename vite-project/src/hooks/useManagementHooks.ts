@@ -3,11 +3,28 @@ import { useFetchData } from './useFetchData';
 import * as api from '../api/apiService'; 
 
 // Định nghĩa Interface sơ lược (Nên lấy từ file BookApi hoặc Model)
-export interface Book { id: number; title: string; availableQuantity: number; totalQuantity: number; isActive: boolean; category: { id: number; categoryName: string; }; authors: { id: number; authorName: string; }[]; bookCode?: string; }
+export interface Book { 
+  id: number; 
+  title: string; 
+  bookCode?: string;          // Thêm ? nếu có thể null
+  publishYear?: number;       // Thêm trường này
+  price?: number;             // Thêm trường này
+  isbn?: string;              // Thêm trường này
+  description?: string;       // Thêm trường này
+  totalQuantity: number; 
+  availableQuantity: number; 
+  isActive: boolean; 
+  isEbook?: boolean;          // Thêm trường này
+  ebookUrl?: string;          // Thêm trường này
+  ebookContent?: string;      // Thêm trường này
+  category?: { id: number; categoryName: string; }; 
+  authors?: { id: number; authorName: string; }[]; 
+  tags?: { id: number; tagName: string; }[]; // Thêm trường tags
+}
 export interface Author { id: number; authorName: string; biography: string; }
 export interface Category { id: number; categoryName: string; description: string; }
 export interface BorrowSlip { id: number; slipCode: string; reader: { id: number; username: string; }; details: { id: number; book: { id: number; title: string; }; borrowDate: number[]; dueDate: number[]; }[]; status: string; }
-export interface User { id: number; userCode: string; username: string; email: string; phoneNumber: string; roles: string[]; status: string; bookQuota: number; }
+export interface User { id: number; userCode: string; username: string; email: string; phoneNumber: string; roles: string[]; status: string; bookQuota: number; birthDate?: number[] | string; }
 export interface Tag { id: number; tagName: string; description: string; }
 
 
