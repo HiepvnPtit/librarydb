@@ -3,7 +3,7 @@ import { Plus, Search, Mail, Phone, Edit, Trash2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import type { User } from '../hooks/useManagementHooks';
 import { useUserData } from '../hooks/useManagementHooks';
-import { deleteUser } from "../api/apiService";
+import { deleteUser, deleteBorrowSlipUser, getBorrowSlipsByUserId } from "../api/apiService";
 import { searchItems } from "../service/SearchingItem";
 
 // Import Form
@@ -152,6 +152,22 @@ export default function UserManagement() {
                       onClick={async () => { 
                         if (handleDelete(item.id)) { 
                           try {
+                            // Thử kiểm tra xem user có BorrowSlip không
+                            try {
+                              const borrowSlips = await getBorrowSlipsByUserId(item.id);
+                              const hasBorrowSlips = (borrowSlips?.data && Array.isArray(borrowSlips.data) && borrowSlips.data.length > 0) || 
+                                                     (Array.isArray(borrowSlips) && borrowSlips.length > 0);
+                              
+                              // Nếu có BorrowSlip, xóa trước
+                              if (hasBorrowSlips) {
+                                await deleteBorrowSlipUser(item.id);
+                              }
+                            } catch (checkErr) {
+                              // Nếu lỗi khi check, bỏ qua - vẫn xóa user
+                              console.warn("Không thể kiểm tra BorrowSlip, vẫn tiếp tục xóa user", checkErr);
+                            }
+                            
+                            // Xóa user
                             await deleteUser(item.id);
                             alert("Xóa người dùng thành công");
                             if(refetchUsers) refetchUsers();

@@ -89,8 +89,9 @@ export default function CirculationManagement() {
       <TopBar title="Circulation Management" />
 
       {/* Filter / Search Bar */}
-      <div className="card filter-bar">
-        <div className="search-wrapper">
+      <div >
+
+        {/* <div className="search-wrapper">
           <Search size={18} color="#A3AED0" />
           <input
             placeholder="Search by user or book..."
@@ -102,7 +103,7 @@ export default function CirculationManagement() {
 
         <button className="btn-primary" onClick={() => setIsCreateBorrowSlipModalOpen(true)}>
           <Plus size={18} /> Create Slip
-        </button>
+        </button> */}
       </div>
 
       {/* Loading State */}
@@ -115,7 +116,26 @@ export default function CirculationManagement() {
 
       {/* Table */}
       {!loading && !isSearching && (
-        <div className="card" style={{ padding: 0 }}>
+        <div className="card" >
+          <div className="section-header">
+           
+            <div className="search-wrapper" style={{ marginRight: 30 }}>
+              <Search size={18} color="#A3AED0"  />
+              <input
+                placeholder="Search by user or book..."
+                className="search-input-field"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+            </div>
+            <button className="btn-primary" onClick={() => setIsCreateBorrowSlipModalOpen(true)}>
+              <Plus size={18} /> Create Slip
+            </button>
+          </div>
+
+
+
+
           <table className="table-container">
             <thead>
               <tr>

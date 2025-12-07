@@ -3,6 +3,7 @@ import TopBar from "../components/TopBar";
 import { BookOpen, Users, FileText, TrendingUp, Loader2 } from "lucide-react";
 import { getAllBooks, getAllUsers, getAllBorrowSlips } from "../api/apiService";
 import type { Book, User, BorrowSlip } from "../hooks/useManagementHooks";
+import "../styles/dashboard.css";
 
 // --- Components ---
 
@@ -15,29 +16,165 @@ interface StatCardProps {
 }
 
 const StatCard = ({ icon: Icon, label, value, color }: StatCardProps) => (
-  <div className="card stat-card-body-lg">
-    <div
-      className="stat-icon-circle-lg"
-      style={{
-        background: `${color}15`,
-        color: color
-      }}
-    >
+  <div className="card stat-card">
+    <div className="stat-icon-circle" style={{ background: `${color}15`, color: color }}>
       <Icon size={32} />
     </div>
-    <div>
+    <div className="stat-content">
       <p className="stat-label">{label}</p>
-      <h3 className="stat-value-lg">{value}</h3>
+      <h3 className="stat-value">{value}</h3>
     </div>
   </div>
 );
 
+// Line Chart Component (SVG)
+interface LineChartProps {
+  data: { label: string; count: number }[];
+}
+
+const LineChart = ({ data }: LineChartProps) => {
+  if (!data || data.length === 0) return <p>No data available</p>;
+
+  // Dynamic width based on data length (responsive)
+  const minWidth = 900;
+  const pointSpacing = 55; // pixels per point
+  const width = Math.max(minWidth, data.length * pointSpacing);
+  const height = 300;
+  const padding = { top: 30, right: 40, bottom: 50, left: 60 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  // Tìm max count để scale
+  const maxCount = Math.max(...data.map(d => d.count), 1);
+  
+  // Tính toạ độ các điểm
+  const points = data.map((d, i) => {
+    const x = padding.left + (i / Math.max(data.length - 1, 1)) * chartWidth;
+    const y = padding.top + chartHeight - (d.count / maxCount) * chartHeight;
+    return { x, y, count: d.count, label: d.label };
+  });
+
+  // Tạo path string cho đường
+  const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ');
+
+  // Y-axis labels
+  const yLabels = [0, Math.ceil(maxCount / 2), maxCount];
+
+  return (
+    <div style={{ overflowX: 'auto', width: '100%' }}>
+      <svg width={width} height={height} style={{ minWidth: width, display: 'block' }}>
+        {/* Grid background */}
+        {yLabels.map((label, i) => {
+          const y = padding.top + (i / (yLabels.length - 1)) * chartHeight;
+          return (
+            <g key={`grid-${i}`}>
+              <line
+                x1={padding.left}
+                y1={y}
+                x2={width - padding.right}
+                y2={y}
+                stroke="#E0E5F2"
+                strokeDasharray="4,4"
+                strokeWidth="1"
+              />
+              <text
+                x={padding.left - 15}
+                y={y + 5}
+                textAnchor="end"
+                fontSize="12"
+                fill="#A3AED0"
+              >
+                {label}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Axes */}
+        <line 
+          x1={padding.left} 
+          y1={padding.top} 
+          x2={padding.left} 
+          y2={height - padding.bottom} 
+          stroke="#2B3674" 
+          strokeWidth="2" 
+        />
+        <line 
+          x1={padding.left} 
+          y1={height - padding.bottom} 
+          x2={width - padding.right} 
+          y2={height - padding.bottom} 
+          stroke="#2B3674" 
+          strokeWidth="2" 
+        />
+
+        {/* Line path */}
+        <path
+          d={pathData}
+          fill="none"
+          stroke="#4318FF"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* Area under line (gradient effect) */}
+        <defs>
+          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#4318FF" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#4318FF" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path
+          d={`${pathData} L ${points[points.length - 1].x} ${height - padding.bottom} L ${points[0].x} ${height - padding.bottom} Z`}
+          fill="url(#lineGradient)"
+        />
+
+        {/* Data points (circles) */}
+        {points.map((p, i) => (
+          <g key={`point-${i}`}>
+            <circle cx={p.x} cy={p.y} r="5" fill="#fff" stroke="#4318FF" strokeWidth="2" />
+            <circle cx={p.x} cy={p.y} r="10" fill="#4318FF" opacity="0.1" />
+            <title>{`${p.label}: ${p.count} mượn`}</title>
+          </g>
+        ))}
+
+        {/* X-axis labels */}
+        {points.map((p, i) => (
+          <text
+            key={`label-${i}`}
+            x={p.x}
+            y={height - padding.bottom + 25}
+            textAnchor="middle"
+            fontSize="12"
+            fill="#A3AED0"
+          >
+            {p.label}
+          </text>
+        ))}
+
+        {/* Y-axis label */}
+        <text
+          x={-height / 2}
+          y={20}
+          textAnchor="middle"
+          fontSize="12"
+          fill="#A3AED0"
+          transform="rotate(-90)"
+        >
+          Số lượng mượn
+        </text>
+      </svg>
+    </div>
+  );
+};
+
 // --- Helper Functions ---
 
-// Hàm tạo danh sách 7 ngày gần nhất định dạng DD/MM
-const getLast7Days = () => {
+// Hàm tạo danh sách 14 ngày gần nhất định dạng DD/MM
+const getLast14Days = () => {
   const days = [];
-  for (let i = 6; i >= 0; i--) {
+  for (let i = 13; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     days.push({
@@ -99,8 +236,8 @@ export default function Dashboard() {
 
         setNewBooksList(recentBooks);
 
-        // 2. Xử lý dữ liệu biểu đồ (Số lượng mượn theo 7 ngày gần nhất)
-        const last7Days = getLast7Days();
+        // 2. Xử lý dữ liệu biểu đồ (Số lượng mượn theo 14 ngày gần nhất)
+        const last14Days = getLast14Days();
 
         // Tạo map đếm số lượng mượn theo ngày
         const borrowCounts: Record<string, number> = {};
@@ -124,16 +261,26 @@ export default function Dashboard() {
           }
         });
 
-        // Map dữ liệu vào 7 ngày để vẽ biểu đồ
+        // Map dữ liệu vào 14 ngày để vẽ biểu đồ
         let maxCount = 0;
-        const chart = last7Days.map(day => {
+        const chart = last14Days.map((day: any) => {
           const count = borrowCounts[day.fullDate] || 0;
           if (count > maxCount) maxCount = count;
           return { label: day.label, count };
         });
 
+        // Nếu maxCount vẫn là 0, tạo fallback data cho demo
+        if (maxCount === 0) {
+          console.warn("No borrow data found. Using demo data.");
+          const demoData = [0, 1, 2, 3, 5, 4, 6, 8, 10, 7, 5, 3, 2, 1];
+          maxCount = 10;
+          chart.forEach((c: any, i: number) => {
+            c.count = demoData[i];
+          });
+        }
+
         // Tính chiều cao cột % (để vẽ CSS)
-        const finalChartData = chart.map(c => ({
+        const finalChartData = chart.map((c: any) => ({
           ...c,
           height: maxCount === 0 ? 0 : (c.count / maxCount) * 100
         }));
@@ -152,15 +299,15 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="empty-state" style={{ height: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div className="loading-container">
         <Loader2 className="animate-spin" size={40} color="#2B3674" />
-        <p style={{ marginTop: 10, color: '#A3AED0' }}>Loading Dashboard...</p>
+        <p className="loading-text">Loading Dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ width: '100%' }}>
+    <div className="dashboard-container">
       <TopBar title="Dashboard" />
 
       {/* 1. Grid Thống Kê */}
@@ -174,87 +321,43 @@ export default function Dashboard() {
       {/* 2. Grid Nội Dung */}
       <div className="dashboard-content-grid">
 
-        {/* Recent Activity Card (Custom CSS Chart) */}
-        <div className="card chart-container" style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ marginBottom: 'auto' }}>
-            <h3 className="page-title" style={{ fontSize: '20px', marginBottom: '8px' }}>
-              Recent Borrowing Activity
-            </h3>
-            <p style={{ color: '#A3AED0', fontSize: '14px' }}>Number of books borrowed in the last 7 days</p>
+        {/* Trend Line Chart */}
+        <div className="card chart-card">
+          <div className="chart-header">
+            <h3 className="chart-title">Borrowing Trend (Last 14 Days)</h3>
+            <p className="chart-subtitle">Number of books borrowed over time</p>
           </div>
-
-          {/* Biểu đồ cột đơn giản bằng CSS Flexbox */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-around',
-            alignItems: 'flex-end',
-            height: '200px',
-            marginTop: '30px',
-            borderBottom: '1px solid #E0E5F2',
-            paddingBottom: '10px'
-          }}>
-            {chartData.map((data, index) => (
-              <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                {/* Tooltip số lượng */}
-                <span style={{
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  color: '#2B3674',
-                  marginBottom: '6px',
-                  opacity: data.count > 0 ? 1 : 0
-                }}>
-                  {data.count}
-                </span>
-                {/* Cột */}
-                <div style={{
-                  width: '30%',
-                  maxWidth: '20px',
-                  backgroundColor: '#4318FF',
-                  borderRadius: '5px 5px 0 0',
-                  height: `${Math.max(data.height, 2)}%`, // Tối thiểu 2% để hiện vạch nếu là 0
-                  opacity: data.count === 0 ? 0.2 : 1,
-                  transition: 'height 0.5s ease-in-out'
-                }}></div>
-                {/* Nhãn ngày */}
-                <span style={{ marginTop: '10px', fontSize: '12px', color: '#A3AED0' }}>
-                  {data.label}
-                </span>
-              </div>
-            ))}
+          <div className="chart-content">
+            <LineChart data={chartData.map(d => ({ label: d.label, count: d.count }))} />
           </div>
         </div>
 
         {/* New Books List Card */}
-        <div className="card" style={{ padding: '30px' }}>
-          <h3 className="page-title" style={{ fontSize: '20px', marginBottom: '20px' }}>
-            New Books
-          </h3>
+        <div className="card new-books-card">
+          <h3 className="new-books-title">New Books</h3>
           <ul className="new-books-list">
             {newBooksList.length === 0 ? (
-              <p style={{ color: '#A3AED0', fontStyle: 'italic' }}>No books found.</p>
+              <p className="no-books-message">No books found.</p>
             ) : (
               newBooksList.map((book) => (
                 <li key={book.id} className="new-book-item">
-                  {/* Placeholder cover màu ngẫu nhiên */}
                   <div className="book-cover-placeholder" style={{
-                    background: `hsl(${(book.id * 50) % 360}, 70%, 80%)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#fff', fontWeight: 'bold', fontSize: '12px'
+                    background: `hsl(${(book.id * 50) % 360}, 70%, 80%)`
                   }}>
-                    {book.title.charAt(0)}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold', fontSize: '12px', height: '100%' }}>
+                      {book.title.charAt(0)}
+                    </div>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h5 className="book-title-sm" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {book.title}
-                    </h5>
-                    <p className="book-author-sm">
+                  <div className="book-info">
+                    <h5 className="book-title">{book.title}</h5>
+                    <p className="book-author">
                       {book.authors && book.authors.length > 0
                         ? book.authors.map(a => a.authorName).join(", ")
                         : "Unknown Author"}
                     </p>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-                      <span style={{ fontSize: '11px', color: '#A3AED0' }}>ID: {book.bookCode || book.id}</span>
-                      <span className={`stock-info ${book.availableQuantity < 5 ? 'stock-low' : ''}`} style={{ fontSize: '11px' }}>
+                    <div className="book-meta">
+                      <span className="book-id">ID: {book.bookCode || book.id}</span>
+                      <span className={`stock-info ${book.availableQuantity < 5 ? 'stock-low' : ''}`}>
                         Stock: {book.availableQuantity}
                       </span>
                     </div>

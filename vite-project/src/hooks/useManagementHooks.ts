@@ -38,6 +38,15 @@ export const useBookData = (shouldFetch: boolean = true) => {
   );
 };
 
+// Hook dùng cho EBOOKS (EbookManagement) - sử dụng API getAllEbooks
+export const useEbookData = (shouldFetch: boolean = true) => {
+  return useFetchData<Book[]>(
+    shouldFetch ? api.getAllEbooks : () => Promise.resolve([] as Book[]),
+    [] as Book[],
+    [shouldFetch]
+  );
+};
+
 // 2. Hook dùng cho AUTHORS (BookManagement)
 export const useAuthorData = (shouldFetch: boolean = true) => {
   return useFetchData<Author[]>(

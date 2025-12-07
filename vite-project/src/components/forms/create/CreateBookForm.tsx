@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { createBook, createAuthor, createCategory, createTag, getAllAuthors, getAllCategories, getAllTags } from "../../../api/apiService";
+import CreateEbookForm from "./CreateEbookForm";
 import type { Author, Category, Tag } from "../../../hooks/useManagementHooks";
 
 interface CreateBookFormProps {
@@ -49,6 +50,10 @@ export default function CreateBookForm({
   const [newTagName, setNewTagName] = useState("");
   const [newTagDesc, setNewTagDesc] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Modal untuk tạo ebook setelah book berhasil dibuat
+  const [showCreateEbookModal, setShowCreateEbookModal] = useState(false);
+  const [createdBookId, setCreatedBookId] = useState<number | null>(null);
 
   // Search filter state
   const [categorySearch, setCategorySearch] = useState("");
@@ -134,16 +139,44 @@ export default function CreateBookForm({
         payload.ebookContent = bookForm.ebookContent;
       }
 
-      await createBook(payload);
-      onSuccess();
-      resetForm();
-      onClose();
+      const response: any = await createBook(payload);
+      const bookId = response?.id || response?.data?.id;
+      
+      // Nếu đánh dấu là ebook, mở form tạo ebook với bookId vừa tạo
+      if (bookForm.isEbook && bookId) {
+        setCreatedBookId(bookId);
+        setShowCreateEbookModal(true);
+        // Không close modal ngay, chờ user tạo ebook hoặc skip
+      } else {
+        // Nếu không phải ebook, close ngay
+        onSuccess();
+        resetForm();
+        onClose();
+      }
     } catch (err) {
       console.error("Create book failed", err);
       alert("Tạo sách thất bại");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEbookSuccess = () => {
+    // Sau khi tạo ebook thành công, reset và close
+    resetForm();
+    setCreatedBookId(null);
+    setShowCreateEbookModal(false);
+    onClose();
+    onSuccess();
+  };
+
+  const handleSkipEbook = () => {
+    // Skip tạo ebook, reset và close
+    resetForm();
+    setCreatedBookId(null);
+    setShowCreateEbookModal(false);
+    onClose();
+    onSuccess();
   };
 
   const submitCreateAuthor = async () => {
@@ -760,6 +793,16 @@ export default function CreateBookForm({
             </div>
           </div>
         </div>
+      )}
+
+      {/* ===== MODAL TẠNG EBOOK SAU KHI TẠO BOOK THÀNH CÔNG ===== */}
+      {showCreateEbookModal && createdBookId && (
+        <CreateEbookForm
+          isOpen={showCreateEbookModal}
+          onClose={handleSkipEbook}
+          onSuccess={handleEbookSuccess}
+          initialBookId={createdBookId}
+        />
       )}
     </div>
   );

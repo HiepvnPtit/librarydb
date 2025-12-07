@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import { useAdminGuard } from "./hooks/useAdminGuard";
 
 // Components
 import Sidebar from "./components/Sidebar";
@@ -14,6 +15,8 @@ import EbookManagement from "./pages/EbookManagement";
 
 // Admin Layout: Chứa Sidebar và vùng nội dung chính
 const AdminLayout = () => {
+  useAdminGuard();
+
   return (
     <div className="app-container">
       <Sidebar />
@@ -30,7 +33,7 @@ export default function App() {
       <Routes>
         {/* Route Public: Login */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/auth" element={<LoginPage />} />
+ 
 
         {/* Route Protected: Admin Dashboard */}
         <Route path="/admin" element={<AdminLayout />}>

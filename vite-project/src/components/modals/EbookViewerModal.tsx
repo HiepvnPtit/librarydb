@@ -1,125 +1,98 @@
 import { useEffect, useState } from "react";
-import { X, Trash2, Image as ImageIcon, Loader2 } from "lucide-react";
-import { getEbookContent, deleteEbookPage } from "../../api/apiService";
+import { X, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { getEbookContent } from "../../api/apiService";
+import "./EbookViewerModal.css";
 
-interface EbookViewerModalProps {
-    bookId: number;
-    bookTitle: string;
-    onClose: () => void;
+// Tạo file css EbookViewerModal.css nếu chưa có:
+// .ebook-viewer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+// .ebook-viewer-container { width: 90%; height: 90%; background: #fff; display: flex; flex-direction: column; }
+// .ebook-viewer-image { max-width: 100%; max-height: 80vh; object-fit: contain; }
+
+interface Page {
+  id?: number;
+  bookId?: number;
+  pageNumber?: number;
+  imageUrl?: string;
+  contentText?: string;
 }
 
-export default function EbookViewerModal({ bookId, bookTitle, onClose }: EbookViewerModalProps) {
-    const [pages, setPages] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+interface Props {
+  bookId: number;
+  bookTitle?: string;
+  onClose: () => void;
+}
 
-    // Hàm gọi API lấy dữ liệu
-    const fetchPages = async () => {
-        try {
-            setLoading(true);
-            console.log("Đang lấy nội dung sách ID:", bookId);
+export default function EbookViewerModal({ bookId, bookTitle, onClose }: Props) {
+  const [pages, setPages] = useState<Page[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
 
-            const res: any = await getEbookContent(bookId);
-            console.log("Kết quả API trả về:", res); // Xem log này để biết cấu trúc dữ liệu
+  useEffect(() => {
+    if (!bookId) return;
+    setLoading(true);
+    getEbookContent(bookId).then((res: any) => {
+        const arr = Array.isArray(res) ? res : (res?.data || []);
+        // Sort trang theo thứ tự
+        arr.sort((a: any, b: any) => (a.pageNumber || 0) - (b.pageNumber || 0));
+        setPages(arr);
+    }).finally(() => setLoading(false));
+  }, [bookId]);
 
-            // Xử lý dữ liệu trả về (đề phòng backend trả về dạng mảng hoặc object)
-            const list = Array.isArray(res) ? res : (res?.data || res?.result || []);
-            setPages(list);
+  // Preload 7 trang tiếp theo khi thay đổi trang hiện tại
+  useEffect(() => {
+    if (pages.length === 0) return;
+    
+    // Preload 7 trang phía sau
+    for (let i = index + 1; i <= Math.min(index + 7, pages.length - 1); i++) {
+      const pageUrl = pages[i]?.imageUrl;
+      if (pageUrl && !preloadedImages.has(pageUrl)) {
+        const img = new Image();
+        img.src = pageUrl;
+        setPreloadedImages(prev => new Set([...prev, pageUrl]));
+      }
+    }
+  }, [index, pages, preloadedImages]);
 
-        } catch (error) {
-            console.error("Lỗi tải nội dung ebook:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const curr = pages[index];
 
-    useEffect(() => {
-        if (bookId) fetchPages();
-    }, [bookId]);
+  if (!bookId) return null;
 
-    const handleDeletePage = async (pageId: number) => {
-        if (!window.confirm("Bạn chắc chắn muốn xóa trang này?")) return;
-        try {
-            await deleteEbookPage(pageId);
-            // Xóa thành công thì lọc bỏ khỏi danh sách đang hiển thị
-            setPages(prev => prev.filter(p => p.id !== pageId));
-        } catch (error) {
-            alert("Xóa trang thất bại!");
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
-
-                {/* Header */}
-                <div className="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-                    <div>
-                        <h3 className="text-lg font-bold text-gray-800">Nội dung: {bookTitle}</h3>
-                        <p className="text-xs text-gray-500">ID: {bookId} • Tổng số trang: {pages.length}</p>
-                    </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full text-gray-500">
-                        <X size={20} />
-                    </button>
-                </div>
-
-                {/* Content Body */}
-                <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                            <Loader2 className="animate-spin mb-2" size={32} />
-                            <p>Đang tải dữ liệu...</p>
-                        </div>
-                    ) : pages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                            <ImageIcon size={48} className="mb-2 opacity-50" />
-                            <p>Chưa có trang nào được tải lên.</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {/* Sắp xếp theo số trang (pageNumber) */}
-                            {pages.sort((a, b) => a.pageNumber - b.pageNumber).map((page) => (
-                                <div key={page.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
-
-                                    {/* Header Card */}
-                                    <div className="px-3 py-2 border-b text-xs font-bold text-gray-600 bg-gray-50 flex justify-between items-center">
-                                        <span>Trang {page.pageNumber}</span>
-                                        <button
-                                            onClick={() => handleDeletePage(page.id)}
-                                            className="text-gray-400 hover:text-red-600 transition-colors"
-                                            title="Xóa trang này"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-
-                                    {/* Ảnh */}
-                                    <div className="relative aspect-[3/4] bg-gray-100 flex items-center justify-center overflow-hidden">
-                                        <img
-                                            src={page.imageUrl}
-                                            alt={`Page ${page.pageNumber}`}
-                                            className="w-full h-full object-contain"
-                                            loading="lazy"
-                                            onError={(e) => {
-                                                // Nếu ảnh lỗi thì hiện placeholder
-                                                e.currentTarget.style.display = 'none';
-                                                e.currentTarget.parentElement?.classList.add('bg-gray-200');
-                                            }}
-                                        />
-                                    </div>
-
-                                    {/* Text OCR (nếu có) */}
-                                    <div className="p-2 h-16 overflow-hidden bg-white border-t border-gray-100">
-                                        <p className="text-[10px] text-gray-500 line-clamp-3">
-                                            {page.contentText || "Không có văn bản mô tả..."}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-            </div>
+  return (
+    <div className="ebook-viewer-overlay" onClick={onClose}>
+      <div className="ebook-viewer-container" onClick={e => e.stopPropagation()}>
+        <div className="ebook-viewer-header">
+          <div className="ebook-viewer-header-left">
+            <strong>{bookTitle || 'Ebook'}</strong>
+            <div className="ebook-viewer-page-count">Trang {curr?.pageNumber || index + 1}/{pages.length}</div>
+          </div>
+          <button className="ebook-viewer-close-btn" onClick={onClose}><X /></button>
         </div>
-    );
+        
+        <div className="ebook-viewer-content">
+            {loading && <div className="ebook-viewer-loading">Loading...</div>}
+            {!loading && curr && (
+              <div className="ebook-viewer-page-display">
+                <div className="ebook-viewer-page-number">Trang {curr.pageNumber || index + 1}</div>
+                <div className="ebook-viewer-image-container">
+                  {curr.imageUrl ? (
+                    <img src={curr.imageUrl} className="ebook-viewer-image" />
+                  ) : (
+                    <div className="ebook-viewer-text-placeholder">
+                      <span className="ebook-viewer-text-placeholder-text">{curr.contentText || 'No content'}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {!loading && !curr && <div className="ebook-viewer-empty">Khong co trang</div>}
+        </div>
+
+        <div className="ebook-viewer-controls">
+            <button className="ebook-viewer-btn" disabled={index === 0} onClick={() => setIndex(i => i-1)}><ChevronsLeft /></button>
+            <button className="ebook-viewer-btn" disabled={index === pages.length - 1} onClick={() => setIndex(i => i+1)}><ChevronsRight /></button>
+        </div>
+      </div>
+    </div>
+  );
 }

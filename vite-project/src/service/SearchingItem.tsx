@@ -4,6 +4,7 @@ import type { Author, Category, Tag, User, BorrowSlip } from "../hooks/useManage
 export const SUGGESTIONS: { label: string; path: string }[] = [
   { label: "Pages / Dashboard", path: "/admin/dashboard" },
   { label: "Pages / Book Management", path: "/admin/books" },
+  { label: "Pages / Ebook Management", path: "/admin/ebooks" },
   { label: "Pages / User Management", path: "/admin/users" },
   { label: "Pages / Circulation Management", path: "/admin/circulation" },
   { label: "Pages / Settings", path: "/admin/settings" },

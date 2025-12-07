@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities; 
 
-/* ... (Giữ nguyên phần @theme và :root từ bài trước nếu muốn, hoặc chỉ cần đoạn dưới đây) ... */
+
 
 @layer base {
   body {

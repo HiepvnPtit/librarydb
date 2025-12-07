@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+
+
 const axiosClient = axios.create({
   baseURL: 'https://okhiepkkkkkkkkkkkkkkhahahahahahahahaha.up.railway.app', 
   headers: {
@@ -33,7 +35,7 @@ axiosClient.interceptors.response.use(
       if (response.status === 401) {
         console.warn("Phiên đăng nhập hết hạn.");
         localStorage.removeItem('accessToken'); 
-        window.location.href = '/auth'; 
+        window.location.href = '/login'; 
       }
       // Log lỗi chi tiết ra console để debug
       console.error("API Error:", response.data);

@@ -1,9 +1,32 @@
 import axiosClient from './axiosClient'; 
 
-// Interface cho Login
+// ============ INTERFACES & TYPES ============
 export interface LoginDto {
     username: string;
     password: string;
+}
+
+// Response wrappers
+export interface ApiResponseCreate {
+    id?: number;
+    [key: string]: any;
+}
+
+// Book & Ebook related
+export interface BookResponse {
+    id: number;
+    title: string;
+    bookCode: string;
+    publishYear: number;
+    price: number;
+    totalQuantity: number;
+    isbn: string;
+    description?: string;
+    categoryId?: number;
+    authorIds?: number[];
+    tagIds?: number[];
+    isEbook?: boolean;
+    [key: string]: any;
 }
 
 
@@ -131,6 +154,14 @@ export const returnBorrowSlipDetail = (detailId: number | string) => {
     return axiosClient.put(`/api/borrowSlips/return/${detailId}`);
 };
 
+export const deleteBorrowSlip = (id: number | string) => {
+    return axiosClient.delete(`/api/borrowSlips/delete/${id}`);
+}
+
+export const deleteBorrowSlipUser = (userId: number | string) => {
+    return axiosClient.delete(`/api/borrowSlips/user/${userId}`);
+}
+
 // 5. CATEGORY CONTROLLER 
 export const getAllCategories = () => {
     return axiosClient.get('/api/category');
@@ -153,6 +184,10 @@ export const deleteCategory = (categoryId: number | string) => {
 };
 
 // 6. EBOOK CONTROLLER 
+export const getAllEbooks = () => {
+    return axiosClient.get('/api/ebooks');
+}
+
 export const getEbookContent = (bookId: number | string) => {
     return axiosClient.get(`/api/ebooks/${bookId}/content`);
 };
@@ -167,6 +202,10 @@ export const createEbookPage = (pageDto: any) => {
 
 export const deleteEbookPage = (pageId: number | string) => {
     return axiosClient.delete(`/api/ebooks/pages/${pageId}`);
+};
+
+export const updateEbookPage = (pageId: number | string, pageDto: any) => {
+    return axiosClient.put(`/api/ebooks/pages/${pageId}`, pageDto);
 };
 
 // 7. READING HISTORY CONTROLLER 
