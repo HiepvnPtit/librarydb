@@ -3,7 +3,7 @@ import TopBar from "../components/TopBar";
 import { BookOpen, Users, FileText, TrendingUp, Loader2, Calendar } from "lucide-react";
 import { getAllBooks, getAllUsers, getBorrowSlipsByCreatedAt } from "../api/apiService";
 import type { Book, User } from "../hooks/useManagementHooks";
-import "../styles/Admin/dashboard.css";
+import "../styles/Admin/Dashboard.css";
 
 // --- Components ---
 interface StatCardProps {
