@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, AlertTriangle, Info } from "lucide-react";
 import { createBorrowSlip, getAllUsers, getAllBooks, getBorrowSlipsByUserId } from "../../../api/apiService";
 import type { Book, User, BorrowSlip } from "../../../hooks/useManagementHooks";
+import "../../../styles/Admin/admin-modal.css"; // Import CSS chung
 
 interface CreateBorrowSlipFormProps {
   isOpen: boolean;
@@ -21,16 +22,13 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
   const [userSearch, setUserSearch] = useState("");
   const [bookSearch, setBookSearch] = useState("");
 
-  // Local state
   const [localUsers, setLocalUsers] = useState<User[]>([]);
   const [localBooks, setLocalBooks] = useState<Book[]>([]);
 
-  // --- STATE QUẢN LÝ SLIP ---
-  const [currentBorrowedCount, setCurrentBorrowedCount] = useState(0); // Tổng số sách đang giữ
-  const [holdingBooksMap, setHoldingBooksMap] = useState<Record<number, number>>({}); // Map đếm số lượng từng cuốn: { bookId: quantity }
-  const [userQuota, setUserQuota] = useState(5); // Hạn mức của user (lấy từ DB)
+  const [currentBorrowedCount, setCurrentBorrowedCount] = useState(0);
+  const [holdingBooksMap, setHoldingBooksMap] = useState<Record<number, number>>({});
+  const [userQuota, setUserQuota] = useState(5);
 
-  // Fetch data ban đầu
   useEffect(() => {
     if (isOpen && localUsers.length === 0) {
       Promise.all([getAllUsers(), getAllBooks()])
@@ -46,7 +44,6 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
     }
   }, [isOpen]);
 
-  // --- LOGIC KIỂM TRA LỊCH SỬ MƯỢN ---
   useEffect(() => {
     const checkUserBorrowStatus = async () => {
       if (form.readerId === 0) {
@@ -56,14 +53,11 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
         return;
       }
 
-      // 1. Cập nhật Quota theo User đã chọn
       const selectedUser = localUsers.find(u => u.id === form.readerId);
-      // Nếu user có bookQuota thì dùng, không thì mặc định 5
       const limit = selectedUser?.bookQuota && selectedUser.bookQuota > 0 ? selectedUser.bookQuota : 5;
       setUserQuota(limit);
 
       try {
-        // 2. Lấy lịch sử mượn
         const slips: BorrowSlip[] = await getBorrowSlipsByUserId(form.readerId) as any;
         
         let totalCount = 0;
@@ -73,11 +67,8 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
           slips.forEach(slip => {
             if (slip.details) {
               slip.details.forEach((detail: any) => {
-                // Sách chưa trả (không có returnDate và status slip không phải RETURNED)
                 if (!detail.returnDate && slip.status !== "RETURNED") {
                   totalCount++;
-                  
-                  // Đếm số lượng từng cuốn sách (ID) đang giữ
                   const bId = detail.book?.id;
                   if (bId) {
                     bookCounts[bId] = (bookCounts[bId] || 0) + 1;
@@ -97,10 +88,8 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
     };
 
     checkUserBorrowStatus();
-  }, [form.readerId, localUsers]); // Thêm localUsers vào deps để đảm bảo tìm thấy user
+  }, [form.readerId, localUsers]);
 
-
-  // --- FILTER ---
   const filteredUsers = (localUsers || []).filter((u) =>
     userSearch === "" ||
     u.username.toLowerCase().includes(userSearch.toLowerCase()) ||
@@ -114,35 +103,24 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
     b.id.toString().includes(bookSearch)
   );
 
-  // --- LOGIC CHỌN SÁCH (TOGGLE) ---
   const toggleBook = (bookId: number) => {
     setForm(prev => {
       const isSelected = prev.bookIds.includes(bookId);
       
-      // A. Nếu đang chọn thêm sách
       if (!isSelected) {
-        // 1. Kiểm tra Tổng Hạn Mức (Quota)
-        // (Sách đang giữ + Sách đã chọn trong form + 1 cuốn định chọn) > Quota
         if (currentBorrowedCount + prev.bookIds.length + 1 > userQuota) {
-          alert(`Không thể chọn thêm! User này chỉ được mượn tối đa ${userQuota} cuốn (Đang giữ: ${currentBorrowedCount}, Đang chọn: ${prev.bookIds.length}).`);
+          alert(`Không thể chọn thêm! User này chỉ được mượn tối đa ${userQuota} cuốn.`);
           return prev;
         }
 
-        // 2. Kiểm tra giới hạn 2 cuốn giống nhau
-        // (Số lượng cuốn này đang giữ + 1 cuốn định chọn) > 2
-        // Lưu ý: Form này dùng checkbox nên chỉ chọn được 1 cuốn mỗi loại trong lần tạo này.
         const holdingQty = holdingBooksMap[bookId] || 0;
         if (holdingQty >= 2) {
-          alert(`Không thể mượn thêm sách này! Người dùng đang giữ ${holdingQty} cuốn cùng loại (Giới hạn tối đa 2 cuốn giống nhau).`);
+          alert(`Không thể mượn thêm sách này! Người dùng đang giữ ${holdingQty} cuốn cùng loại.`);
           return prev;
         }
-        // Trường hợp hy hữu: Nếu form cho phép chọn số lượng (ở đây checkbox là 1), 
-        // thì holdingQty + (sl_trong_form) + 1 > 2
 
         return { ...prev, bookIds: [...prev.bookIds, bookId] };
       } 
-      
-      // B. Nếu bỏ chọn
       else {
         return { ...prev, bookIds: prev.bookIds.filter(id => id !== bookId) };
       }
@@ -154,7 +132,6 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
     if (!form.readerId) return alert("Vui lòng chọn bạn đọc");
     if (!form.bookIds.length) return alert("Vui lòng chọn ít nhất 1 cuốn sách");
     
-    // Check lại lần cuối (Double check)
     if (currentBorrowedCount + form.bookIds.length > userQuota) {
       return alert(`Vượt quá hạn mức mượn sách (${userQuota} cuốn).`);
     }
@@ -163,7 +140,6 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
     try {
       await createBorrowSlip(form);
       onSuccess();
-      // Reset form
       setForm({ readerId: 0, bookIds: [], note: "" });
       setUserSearch("");
       setBookSearch("");
@@ -181,25 +157,29 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
 
   if (!isOpen) return null;
 
-  // Tính toán UI
   const isQuotaFull = currentBorrowedCount >= userQuota;
   
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ width: 600, maxWidth: "95%", maxHeight: "90vh", overflowY: "auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h3>Tạo Phiếu Mượn Mới</h3>
-          <button className="btn-cancel" onClick={onClose}>
-            <X size={20} />
+    <div className="admin-modal-overlay" onClick={onClose}>
+      <div 
+        className="admin-modal-content" 
+        onClick={(e) => e.stopPropagation()} 
+        style={{ width: 650 }} // Form này cần rộng hơn chút
+      >
+        <div className="admin-modal-header">
+          <h3 className="admin-modal-title">Tạo Phiếu Mượn Mới</h3>
+          <button className="admin-btn-close" onClick={onClose}>
+            <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ overflowY: 'auto', maxHeight: '75vh', paddingRight: '5px' }}>
+          
           {/* 1. Chọn Người dùng */}
-          <div className="form-group">
-            <label className="form-label">Bạn Đọc *</label>
+          <div className="admin-form-group">
+            <label className="admin-form-label">Bạn Đọc *</label>
             <input
-              className="form-input"
+              className="admin-form-input"
               placeholder="Tìm bạn đọc theo tên, email hoặc ID..."
               value={userSearch}
               onChange={(e) => setUserSearch(e.target.value)}
@@ -208,7 +188,7 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
             />
             
             {userSearch !== null && (filteredUsers.length > 0 || users?.length === 0) && (
-              <div style={{ maxHeight: 150, overflowY: "auto", border: "1px solid #ddd", borderRadius: 4, marginBottom: 8, backgroundColor: "#fff" }}>
+              <div style={{ maxHeight: 150, overflowY: "auto", border: "1px solid #ddd", borderRadius: 6, marginBottom: 8, backgroundColor: "#fff" }}>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((u) => (
                     <div
@@ -216,40 +196,42 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
                       style={{
                         padding: "10px 12px",
                         cursor: "pointer",
-                        backgroundColor: form.readerId === u.id ? "#c8e6c9" : "transparent",
-                        borderBottom: "1px solid #eee",
+                        backgroundColor: form.readerId === u.id ? "#e3f2fd" : "transparent",
+                        borderBottom: "1px solid #f0f0f0",
+                        fontSize: '14px',
+                        color: '#333'
                       }}
                       onClick={() => {
-                        setForm({ ...form, readerId: u.id, bookIds: [] }); // Reset sách khi đổi user
+                        setForm({ ...form, readerId: u.id, bookIds: [] });
                         setUserSearch("");
                       }}
                     >
-                      <div><strong>ID{u.id}</strong> - {u.username} (Quota: {u.bookQuota || 5})</div>
+                      <strong>ID{u.id}</strong> - {u.username} (Quota: {u.bookQuota || 5})
                     </div>
                   ))
                 ) : (
-                  <div style={{ padding: 10, color: "#999" }}>Không tìm thấy bạn đọc</div>
+                  <div style={{ padding: 10, color: "#999", fontSize: '14px' }}>Không tìm thấy bạn đọc</div>
                 )}
               </div>
             )}
 
             {/* Thông báo trạng thái Hạn mức */}
             {form.readerId > 0 && (
-              <div style={{ marginBottom: 8, padding: 12, backgroundColor: isQuotaFull ? "#ffebee" : "#e8f5e9", borderRadius: 4, border: "1px solid #ddd" }}>
+              <div style={{ marginBottom: 8, padding: 12, backgroundColor: isQuotaFull ? "#fef2f2" : "#f0fdf4", borderRadius: 6, border: "1px solid " + (isQuotaFull ? "#fecaca" : "#bbf7d0") }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>
+                  <span style={{ fontSize: '14px', color: '#1f2937' }}>
                     ✓ Người mượn: <b>{localUsers?.find(u => u.id === form.readerId)?.username}</b>
                   </span>
                   <button
                     type="button"
-                    style={{ padding: "2px 6px", background: "#ff6b6b", color: "#fff", border: "none", borderRadius: 3, cursor: "pointer" }}
+                    style={{ padding: "4px 10px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer", fontSize: '12px' }}
                     onClick={() => { setForm({ ...form, readerId: 0, bookIds: [] }); setCurrentBorrowedCount(0); }}
                   >
                     Đổi
                   </button>
                 </div>
                 
-                <div style={{ marginTop: 8, fontSize: '13px', color: isQuotaFull ? '#d32f2f' : '#2e7d32', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ marginTop: 8, fontSize: '13px', color: isQuotaFull ? '#dc2626' : '#15803d', display: 'flex', alignItems: 'center', gap: 6 }}>
                   {isQuotaFull ? <AlertTriangle size={16} /> : <Info size={16} />}
                   <span>
                     Đang giữ: <b>{currentBorrowedCount}/{userQuota}</b> cuốn. 
@@ -264,10 +246,10 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
           </div>
 
           {/* 2. Chọn Sách */}
-          <div className="form-group">
-            <label className="form-label">Sách Mượn *</label>
+          <div className="admin-form-group">
+            <label className="admin-form-label">Sách Mượn *</label>
             <input
-              className="form-input"
+              className="admin-form-input"
               placeholder="Tìm sách..."
               value={bookSearch}
               onChange={(e) => setBookSearch(e.target.value)}
@@ -275,18 +257,13 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
               style={{ marginBottom: 8 }}
             />
             
-            <div style={{ border: "1px solid #ddd", borderRadius: 4, padding: 8, maxHeight: 200, overflowY: "auto", backgroundColor: (form.readerId === 0) ? "#f5f5f5" : "#fff" }}>
+            <div style={{ border: "1px solid #e5e7eb", borderRadius: 6, padding: 0, maxHeight: 200, overflowY: "auto", backgroundColor: (form.readerId === 0) ? "#f9fafb" : "#fff" }}>
               {filteredBooks.length === 0 ? (
-                <p style={{ color: "#999", textAlign: "center" }}>Không có sách</p>
+                <p style={{ color: "#9ca3af", textAlign: "center", padding: 12, fontSize: '14px' }}>Không có sách</p>
               ) : (
                 filteredBooks.map(b => {
                   const isChecked = form.bookIds.includes(b.id);
-                  // Kiểm tra đang giữ bao nhiêu cuốn loại này
                   const holdingThisBook = holdingBooksMap[b.id] || 0;
-                  // Disable nếu: 
-                  // 1. Chưa chọn User
-                  // 2. Full Quota (và sách này chưa được chọn)
-                  // 3. Đã giữ >= 2 cuốn loại này (và sách này chưa được chọn)
                   const isDisabled = form.readerId === 0 || 
                                      (!isChecked && (currentBorrowedCount + form.bookIds.length >= userQuota)) ||
                                      (!isChecked && holdingThisBook >= 2);
@@ -295,11 +272,12 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
                     <label 
                       key={b.id} 
                       style={{ 
-                        display: "flex", alignItems: "center", gap: 8, padding: 6, 
+                        display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", 
                         cursor: isDisabled ? "not-allowed" : "pointer", 
-                        borderBottom: "1px solid #eee",
-                        opacity: isDisabled ? 0.5 : 1,
-                        backgroundColor: isChecked ? "#fff9c4" : "transparent"
+                        borderBottom: "1px solid #f3f4f6",
+                        opacity: isDisabled ? 0.6 : 1,
+                        backgroundColor: isChecked ? "#eff6ff" : "transparent",
+                        fontSize: '14px', color: '#374151'
                       }}
                       title={isDisabled ? (holdingThisBook >= 2 ? "Đã mượn tối đa 2 cuốn loại này" : "Hết hạn mức mượn") : ""}
                     >
@@ -308,11 +286,12 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
                         checked={isChecked}
                         onChange={() => toggleBook(b.id)}
                         disabled={isDisabled}
+                        style={{ width: 16, height: 16, cursor: 'pointer' }}
                       />
                       <div style={{display:'flex', flexDirection:'column'}}>
                         <span><strong>ID{b.id}</strong> - {b.title}</span>
                         {holdingThisBook > 0 && (
-                          <span style={{fontSize: 11, color: '#f57c00'}}>
+                          <span style={{fontSize: 12, color: '#f97316', fontWeight: 500}}>
                             (Đang giữ: {holdingThisBook} cuốn)
                           </span>
                         )}
@@ -325,21 +304,21 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
 
             {/* List sách đã chọn */}
             {form.bookIds.length > 0 && (
-              <div style={{ marginTop: 8, padding: 8, backgroundColor: "#f0f0f0", borderRadius: 4 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+              <div style={{ marginTop: 12, padding: 12, backgroundColor: "#f3f4f6", borderRadius: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: '#4b5563' }}>
                   ✓ Đã chọn ({form.bookIds.length}):
                 </div>
                 {form.bookIds.map(id => {
                   const book = localBooks?.find(b => b.id === id) || books?.find(b => b.id === id);
                   return (
-                    <div key={id} style={{ fontSize: 12, display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-                      <span>• {book?.title}</span>
+                    <div key={id} style={{ fontSize: 13, display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, paddingBottom: 6, borderBottom: '1px dashed #e5e7eb' }}>
+                      <span style={{color: '#1f2937'}}>• {book?.title}</span>
                       <button
                         type="button"
-                        style={{ padding: "0px 6px", background: "#ff6b6b", color: "#fff", border: "none", borderRadius: 3, cursor: "pointer" }}
+                        style={{ padding: "2px 8px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 11 }}
                         onClick={() => toggleBook(id)}
                       >
-                        X
+                        Xóa
                       </button>
                     </div>
                   );
@@ -348,26 +327,27 @@ export default function CreateBorrowSlipForm({ isOpen, onClose, onSuccess, users
             )}
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Ghi Chú</label>
+          <div className="admin-form-group">
+            <label className="admin-form-label">Ghi Chú</label>
             <textarea
-              className="form-input form-textarea"
+              className="admin-form-input admin-form-textarea"
               value={form.note}
               onChange={(e) => setForm({ ...form, note: e.target.value })}
               rows={3}
+              style={{ resize: 'none' }}
             />
           </div>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12 }}>
+          <div className="admin-modal-footer">
+            <button type="button" className="admin-btn admin-btn-cancel" onClick={onClose}>
+              Hủy
+            </button>
             <button 
               type="submit" 
-              className="btn-primary" 
+              className="admin-btn admin-btn-primary" 
               disabled={isSubmitting || (isQuotaFull && form.bookIds.length === 0)}
             >
               {isSubmitting ? "Đang tạo..." : "Tạo Phiếu Mượn"}
-            </button>
-            <button type="button" className="btn-cancel" onClick={onClose}>
-              Hủy
             </button>
           </div>
         </form>

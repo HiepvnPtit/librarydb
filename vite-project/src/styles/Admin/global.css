@@ -19,7 +19,7 @@
   /* --- Backgrounds --- */
   --bg-body: #F4F7FE;
   /* Nền tổng thể (Xám xanh rất nhạt) */
-  --bg-sidebar: #111C44;
+  --bg-sidebar: #2e2e2e;
   /* Nền Sidebar (Xanh đen đậm) */
   --bg-card: #FFFFFF;
   /* Nền Card (Trắng) */
@@ -92,6 +92,10 @@ body {
   padding: 30px;
   width: calc(100% - 280px);
   /* Chiếm hết phần còn lại */
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #e9e9e9;
   transition: all 0.3s ease;
 }
 
@@ -113,7 +117,7 @@ body {
 }
 
 .sidebar-header {
-  background-color:#00229b;
+  background-color:#1e1e1e;
   padding: 25px 32px;
   display: flex;
   align-items: center;
@@ -146,6 +150,14 @@ body {
   gap: 4px;
 }
 
+/* Footer area of the sidebar (Logout button) */
+.sidebar-footer {
+  padding: 20px 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .nav-item {
   display: flex;
   align-items: center;
@@ -160,13 +172,13 @@ body {
 
 .nav-item:hover {
   color: var(--text-white);
-  background-color: #2B3674;
+  background-color: #353535;
 }
 
 .nav-item.active {
-  background: linear-gradient(to right, #ff0000, #9a0000); 
+  background: linear-gradient(to right, #474548, #474548); 
   color: var(--text-white);
-  background-color: #c43030;
+  background-color: #474548;
   /* font-weight: 700; */
 }
 
@@ -182,11 +194,15 @@ body {
   background-color: #ff3c3c;
   border-radius: 4px 0 0 4px;
   box-shadow: var(--shadow-sm);
+}
 
-  .nav-icon {
-    margin-right: 14px;
-    display: flex;
-  }
+.nav-icon {
+  margin-right: 14px;
+  display: flex;
+}
+
+.nav-label {
+  flex: 1;
 }
 
 /* 
@@ -279,21 +295,11 @@ body {
 }
 
 .modal-content {
-
   padding: 40px;
   background-color: #4a4a4aa2;
 }
-.stat-label {
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 4px;
-}
 
-.stat-value {
-  color: var(--text-main);
-  font-size: 24px;
-  font-weight: 700;
-}
+/* Removed duplicate .stat-label and .stat-value - use Dashboard.css instead */
 
 /* 
       6. COMPONENT: TABLES

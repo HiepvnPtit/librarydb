@@ -72,7 +72,16 @@ export default function UserManagement() {
   };
 
   const displayUsers = searchResults !== null ? searchResults : (users as User[]);
-  const displayData = displayUsers.map(formatUserForDisplay);
+  // Sắp xếp: Admin user lên đầu, sau đó sắp xếp theo tên
+  const sortedUsers = displayUsers.sort((a, b) => {
+    const aIsAdmin = a.roles?.includes('admin') || a.roles?.includes('Admin') || a.roles?.includes('ADMIN');
+    const bIsAdmin = b.roles?.includes('admin') || b.roles?.includes('Admin') || b.roles?.includes('ADMIN');
+
+    if (aIsAdmin && !bIsAdmin) return -1;
+    if (!aIsAdmin && bIsAdmin) return 1;
+    return a.username.localeCompare(b.username);
+  });
+  const displayData = sortedUsers.map(formatUserForDisplay);
 
   return (
     <div>
@@ -110,8 +119,17 @@ export default function UserManagement() {
               <p>Không tìm thấy người dùng nào.</p>
             </div>
           ) : (
-            displayData.map((item) => (
-              <div key={item.id} className="card user-card" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
+            displayData.map((item) => {
+              const isAdmin = item.originalData?.roles?.includes('admin') || item.originalData?.roles?.includes('Admin') || item.originalData?.roles?.includes('ADMIN');
+              return (
+                <div key={item.id} className="card user-card" style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '20px',
+                  alignItems: 'start',
+                  backgroundColor: isAdmin ? '#fef3c7' : undefined,
+                  border: isAdmin ? '2px solid #f59e0b' : undefined
+                }}>
                 {/* Left Section: Avatar & Info */}
                 <div>
                   <div className="user-avatar" style={{ background: item.bg }}>
@@ -182,7 +200,8 @@ export default function UserManagement() {
                   </div>
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
       )}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { createAuthor } from "../../../api/apiService";
+import "../../../styles/Admin/author.css"; 
 
 interface CreateAuthorFormProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export default function CreateAuthorForm({ isOpen, onClose, onSuccess }: CreateA
     setIsSubmitting(true);
     try {
       await createAuthor(form);
+      alert("Tạo tác giả thành công!");
       onSuccess();
       setForm({ authorName: "", biography: "" });
       onClose();
@@ -33,42 +35,45 @@ export default function CreateAuthorForm({ isOpen, onClose, onSuccess }: CreateA
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h3>Tạo Tác Giả Mới</h3>
-          <button className="btn-cancel" onClick={onClose}>
-            <X size={20} />
+    <div className="author-modal-overlay" onClick={onClose}>
+      <div className="author-modal-content" onClick={(e) => e.stopPropagation()}>
+        
+        <div className="author-modal-header">
+          <h3 className="author-modal-title">Tạo Tác Giả Mới</h3>
+          <button className="author-btn-close" onClick={onClose}>
+            <X size={24} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Tên Tác Giả *</label>
+          <div className="author-form-group">
+            <label className="author-form-label">Tên Tác Giả *</label>
             <input
-              className="form-input"
+              className="author-form-input"
               value={form.authorName}
               onChange={(e) => setForm({ ...form, authorName: e.target.value })}
+              placeholder="Nhập tên tác giả..."
               required
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Tiểu Sử</label>
+          <div className="author-form-group">
+            <label className="author-form-label">Tiểu Sử</label>
             <textarea
-              className="form-input form-textarea"
+              className="author-form-input author-form-textarea"
               value={form.biography}
               onChange={(e) => setForm({ ...form, biography: e.target.value })}
               rows={4}
+              placeholder="Nhập tiểu sử (nếu có)..."
             />
           </div>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12 }}>
-            <button type="submit" className="btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? "Đang tạo..." : "Tạo Tác Giả"}
-            </button>
-            <button type="button" className="btn-cancel" onClick={onClose}>
+          <div className="author-modal-footer">
+            <button type="button" className="author-btn author-btn-cancel" onClick={onClose}>
               Hủy
+            </button>
+            <button type="submit" className="author-btn author-btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? "Đang tạo..." : "Tạo Tác Giả"}
             </button>
           </div>
         </form>

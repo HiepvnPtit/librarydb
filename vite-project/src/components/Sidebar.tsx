@@ -4,11 +4,20 @@ import {
   BookOpen,
   Repeat,
   Users,
-  Settings,
   Library
 } from "lucide-react";
 
 import { Tablet } from "lucide-react";
+
+const Logout = () => {
+  try{localStorage.removeItem('accessToken');
+  window.location.href = '/login';
+
+  } catch (error) {
+    console.error("Logout Error:", error);
+  }
+
+}
 
 export default function Sidebar() {
   const location = useLocation();
@@ -39,11 +48,6 @@ export default function Sidebar() {
       label: "User Management",
       icon: <Users size={20} />
     },
-    {
-      path: "/admin/settings",
-      label: "Settings",
-      icon: <Settings size={20} />
-    },
   ];
 
   return (
@@ -55,7 +59,6 @@ export default function Sidebar() {
         <h1 className="logo-text">LMS Admin</h1>
       </div>
 
-      <div className="sidebar-divider">MENU</div>
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => {
@@ -78,13 +81,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="admin-card">
-          <div className="admin-avatar">AD</div>
-          <div className="admin-info">
-            <p className="admin-name">Administrator</p>
-            <p className="admin-role">Super Admin</p>
-          </div>
-        </div>
+        <button className="btn-logout" onClick={Logout}>Logout</button>
       </div>
     </aside>
   );

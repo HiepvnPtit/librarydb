@@ -19,10 +19,11 @@ interface Page {
 interface Props {
   bookId: number;
   bookTitle?: string;
+  coverUrl?: string; // Optional cover image for ebook
   onClose: () => void;
 }
 
-export default function EbookViewerModal({ bookId, bookTitle, onClose }: Props) {
+export default function EbookViewerModal({ bookId, bookTitle, coverUrl, onClose }: Props) {
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(false);
   const [index, setIndex] = useState(0);
@@ -70,6 +71,11 @@ export default function EbookViewerModal({ bookId, bookTitle, onClose }: Props) 
         </div>
         
         <div className="ebook-viewer-content">
+            {coverUrl && (
+              <div className="ebook-viewer-cover" style={{ textAlign: 'center', padding: '10px 0' }}>
+                <img src={coverUrl} alt={bookTitle || 'Ebook cover'} style={{ maxHeight: '240px', maxWidth: '100%', objectFit: 'contain' }} />
+              </div>
+            )}
             {loading && <div className="ebook-viewer-loading">Loading...</div>}
             {!loading && curr && (
               <div className="ebook-viewer-page-display">
@@ -85,7 +91,11 @@ export default function EbookViewerModal({ bookId, bookTitle, onClose }: Props) 
                 </div>
               </div>
             )}
-            {!loading && !curr && <div className="ebook-viewer-empty">Khong co trang</div>}
+            {!loading && !curr && (
+              <div className="ebook-viewer-empty" style={{ padding: '12px', textAlign: 'center' }}>
+                Khong co trang
+              </div>
+            )}
         </div>
 
         <div className="ebook-viewer-controls">

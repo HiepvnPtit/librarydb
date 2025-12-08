@@ -1,6 +1,7 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { X } from "lucide-react";
 import { createCategory } from "../../../api/apiService";
+import "../../../styles/Admin/admin-modal.css"; 
 
 interface CreateCategoryFormProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export default function CreateCategoryForm({ isOpen, onClose, onSuccess }: Creat
     setIsSubmitting(true);
     try {
       await createCategory(form);
+      alert("Tạo danh mục thành công!");
       onSuccess();
       setForm({ categoryName: "", description: "" });
       onClose();
@@ -33,42 +35,43 @@ export default function CreateCategoryForm({ isOpen, onClose, onSuccess }: Creat
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h3>Tạo Danh Mục Mới</h3>
-          <button className="btn-cancel" onClick={onClose}>
-            <X size={20} />
+    <div className="admin-modal-overlay" onClick={onClose}>
+      <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
+        
+        <div className="admin-modal-header">
+          <h3 className="admin-modal-title">Tạo Danh Mục Mới</h3>
+          <button className="admin-btn-close" onClick={onClose}>
+            <X size={24} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Tên Danh Mục *</label>
+          <div className="admin-form-group">
+            <label className="admin-form-label">Tên Danh Mục *</label>
             <input
-              className="form-input"
+              className="admin-form-input"
               value={form.categoryName}
               onChange={(e) => setForm({ ...form, categoryName: e.target.value })}
               required
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Mô Tả</label>
+          <div className="admin-form-group">
+            <label className="admin-form-label">Mô Tả</label>
             <textarea
-              className="form-input form-textarea"
+              className="admin-form-input admin-form-textarea"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={4}
             />
           </div>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12 }}>
-            <button type="submit" className="btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? "Đang tạo..." : "Tạo Danh Mục"}
-            </button>
-            <button type="button" className="btn-cancel" onClick={onClose}>
+          <div className="admin-modal-footer">
+            <button type="button" className="admin-btn admin-btn-cancel" onClick={onClose}>
               Hủy
+            </button>
+            <button type="submit" className="admin-btn admin-btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? "Đang tạo..." : "Tạo Danh Mục"}
             </button>
           </div>
         </form>

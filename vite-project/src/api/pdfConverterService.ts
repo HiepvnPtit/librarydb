@@ -59,7 +59,7 @@ export class PDFConverterService {
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        await page.render({ canvasContext: context, viewport }).promise;
+        await page.render({ canvas, canvasContext: context, viewport }).promise;
 
         const blob = await new Promise<Blob | null>((resolve) => 
           canvas.toBlob(resolve, 'image/jpeg', 0.9)
@@ -105,7 +105,7 @@ export class PDFConverterService {
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       
-      await page.render({ canvasContext: context, viewport }).promise;
+      await page.render({ canvas, canvasContext: context, viewport }).promise;
       
       pagesData.push({ canvas, width: viewport.width, height: viewport.height });
       totalHeight += viewport.height;

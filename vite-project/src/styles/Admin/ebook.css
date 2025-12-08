@@ -242,7 +242,7 @@
   cursor: not-allowed;
 }
 
-.search-box {
+.ebook-search-box {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -252,7 +252,7 @@
   background: #fff;
 }
 
-.search-input {
+.ebook-search-input {
   border: none;
   outline: none;
   padding: 6px 4px;
