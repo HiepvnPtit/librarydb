@@ -11,6 +11,9 @@ interface CreateBookFormProps {
   authors: Author[];
   categories: Category[];
   tags: Tag[];
+  onRefetchAuthors?: () => void;     // Dấu ? để không bắt buộc nếu bạn muốn
+  onRefetchCategories?: () => void;
+  onRefetchTags?: () => void;
 }
 
 export default function CreateBookForm({
