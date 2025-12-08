@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import TopBar from "../components/TopBar";
 import { BookOpen, Users, FileText, TrendingUp, Loader2, Calendar } from "lucide-react";
 import { getAllBooks, getAllUsers, getBorrowSlipsByCreatedAt } from "../api/apiService";
-import type { Book, User, BorrowSlip } from "../hooks/useManagementHooks";
+import type { Book, User } from "../hooks/useManagementHooks";
 import "../styles/Admin/dashboard.css";
 
 // --- Components ---

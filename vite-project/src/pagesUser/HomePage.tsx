@@ -29,7 +29,7 @@ export const HomePage: React.FC = () => {
     
     // Handlers
     handleSmartSearch, handleBookClick, handleNavigate, closeModals, 
-    setEbookModalOpen, setBorrowFormOpen, setSelectedBookId
+     setBorrowFormOpen, setSelectedBookId
   } = useHomeLogic();
 
   return (
