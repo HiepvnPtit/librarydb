@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Clock, Percent, Book } from "lucide-react";
+import { BookOpen} from "lucide-react";
 import "../styles/User/home.css";
 import "../styles/User/book-card.css"; 
 import { getReadingHistoryByUserId, saveReadingProgress } from "../api/apiService";
@@ -15,7 +15,7 @@ export const EbookHistoryPage: React.FC = () => {
     if (!value) return "";
     if (typeof value === "string") return value;
     if (Array.isArray(value)) {
-      const [y, m, d, hh = 0, mm = 0, ss = 0] = value;
+      const [y, m, d, hh = 0, mm = 0, ] = value;
       const pad = (n: number) => String(n).padStart(2, "0");
       if (!y || !m || !d) return "";
       return `${pad(d)}/${pad(m)}/${y} ${pad(hh)}:${pad(mm)}`; // Bỏ giây cho gọn

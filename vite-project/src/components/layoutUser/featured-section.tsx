@@ -1,5 +1,4 @@
 import React from "react";
-import { BookOpen, Calendar, ArrowRight } from "lucide-react";
 import "../../styles/User/featured-section.css";
 
 interface FeaturedSectionProps {
@@ -7,7 +6,7 @@ interface FeaturedSectionProps {
   userName?: string; // Thêm prop tên người dùng
 }
 
-export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onViewAll, userName = "Bạn" }) => {
+export const FeaturedSection: React.FC<FeaturedSectionProps> = ({  userName = "Bạn" }) => {
   return (
     <section className="user-hero">
       <div className="user-hero__content">
